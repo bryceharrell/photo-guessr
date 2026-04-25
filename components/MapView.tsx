@@ -57,7 +57,7 @@ export default function MapView({ onPinDrop, guessPin, actualPin, resultMode = f
       mapboxAccessToken={MAPBOX_TOKEN}
       initialViewState={initialViewState}
       style={{ width: '100%', height: '100%' }}
-      mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+      mapStyle="mapbox://styles/mapbox/outdoors-v12"
       onClick={handleClick}
       cursor={resultMode ? 'default' : 'crosshair'}
     >

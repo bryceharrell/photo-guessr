@@ -56,15 +56,16 @@ export default function RoundScreen({ round, roundNumber, totalRounds, onSubmitG
         {secondsLeft}s
       </div>
 
-      <PhotoPiP previewUrl={round.photo.previewUrl} />
-
-      <button
-        onClick={() => pin && onSubmitGuess(pin.lat, pin.lng)}
-        disabled={!pin}
-        className="absolute bottom-4 right-4 z-10 px-6 py-3 bg-white text-black font-semibold rounded-xl shadow-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-200 transition-colors"
-      >
-        Submit Guess
-      </button>
+      <div className="absolute bottom-4 left-4 right-4 z-10 flex items-end justify-between gap-3">
+        <PhotoPiP previewUrl={round.photo.previewUrl} />
+        <button
+          onClick={() => pin && onSubmitGuess(pin.lat, pin.lng)}
+          disabled={!pin}
+          className="flex-shrink-0 px-6 py-3 bg-white text-black font-semibold rounded-xl shadow-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-200 transition-colors"
+        >
+          Submit Guess
+        </button>
+      </div>
     </div>
   )
 }

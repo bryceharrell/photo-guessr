@@ -54,7 +54,7 @@ export default function UploadScreen({ onStartGame }: Props) {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Pinpoint</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-2">PhotoGuessr</h1>
           <p className="text-zinc-400">Upload photos and guess where they were taken.</p>
         </div>
 

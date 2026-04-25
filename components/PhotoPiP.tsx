@@ -12,7 +12,7 @@ export default function PhotoPiP({ previewUrl }: Props) {
   return (
     <>
       <div
-        className="absolute bottom-4 left-4 z-10 w-[220px] sm:w-[280px] h-[140px] sm:h-[180px] rounded-xl overflow-hidden shadow-2xl cursor-pointer ring-1 ring-white/10 hover:ring-white/30 transition-all"
+        className="relative w-[160px] sm:w-[220px] md:w-[280px] h-[103px] sm:h-[140px] md:h-[180px] rounded-xl overflow-hidden shadow-2xl cursor-pointer ring-1 ring-white/10 hover:ring-white/30 transition-all flex-shrink-0"
         onClick={() => setIsExpanded(true)}
       >
         <img src={previewUrl} alt="Round photo" className="w-full h-full object-cover" />

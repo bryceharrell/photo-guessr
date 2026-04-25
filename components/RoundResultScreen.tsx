@@ -22,11 +22,17 @@ export default function RoundResultScreen({ round, isLastRound, onNext }: Props)
       <MapViewDynamic guessPin={guessPin} actualPin={actualPin} resultMode />
 
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-zinc-900/90 backdrop-blur-sm border border-zinc-700 rounded-2xl px-8 py-5 text-center shadow-2xl">
-        <p className="text-zinc-400 text-sm mb-1">Distance</p>
-        <p className="text-3xl font-bold mb-3">
-          {round.distanceMiles?.toFixed(1)}{' '}
-          <span className="text-lg font-normal text-zinc-400">miles</span>
-        </p>
+        {guessPin === null ? (
+          <p className="text-red-400 font-semibold text-lg mb-3">Time&apos;s up!</p>
+        ) : (
+          <>
+            <p className="text-zinc-400 text-sm mb-1">Distance</p>
+            <p className="text-3xl font-bold mb-3">
+              {round.distanceMiles?.toFixed(1)}{' '}
+              <span className="text-lg font-normal text-zinc-400">miles</span>
+            </p>
+          </>
+        )}
         <p className="text-zinc-400 text-sm mb-1">Score</p>
         <p className="text-3xl font-bold mb-5">{round.score?.toLocaleString()}</p>
         <button

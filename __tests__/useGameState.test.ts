@@ -84,4 +84,30 @@ describe('useGameState', () => {
     expect(result.current.gameState.rounds.length).toBe(0)
     expect(result.current.gameState.currentRoundIndex).toBe(0)
   })
+
+  it('timeoutRound transitions to round_result', () => {
+    const { result } = renderHook(() => useGameState())
+    act(() => { result.current.startGame([makePhoto()]) })
+    act(() => { result.current.timeoutRound() })
+    expect(result.current.gameState.status).toBe('round_result')
+  })
+
+  it('timeoutRound sets score to 0 and leaves guess coords null', () => {
+    const { result } = renderHook(() => useGameState())
+    act(() => { result.current.startGame([makePhoto()]) })
+    act(() => { result.current.timeoutRound() })
+    const round = result.current.gameState.rounds[0]
+    expect(round.score).toBe(0)
+    expect(round.guessedLat).toBeNull()
+    expect(round.guessedLng).toBeNull()
+    expect(round.completed).toBe(true)
+  })
+
+  it('timeoutRound sets distanceMiles to null when no pin was dropped', () => {
+    const { result } = renderHook(() => useGameState())
+    act(() => { result.current.startGame([makePhoto()]) })
+    act(() => { result.current.timeoutRound() })
+    const round = result.current.gameState.rounds[0]
+    expect(round.distanceMiles).toBeNull()
+  })
 })

@@ -58,9 +58,26 @@ export function useGameState() {
     })
   }
 
+  function timeoutRound() {
+    setGameState((prev) => {
+      const round = prev.rounds[prev.currentRoundIndex]
+      const updatedRound: Round = {
+        ...round,
+        guessedLat: null,
+        guessedLng: null,
+        distanceMiles: null,
+        score: 0,
+        completed: true,
+      }
+      const updatedRounds = [...prev.rounds]
+      updatedRounds[prev.currentRoundIndex] = updatedRound
+      return { ...prev, status: 'round_result', rounds: updatedRounds }
+    })
+  }
+
   function resetGame() {
     setGameState(INITIAL_STATE)
   }
 
-  return { gameState, startGame, submitGuess, nextRound, resetGame }
+  return { gameState, startGame, submitGuess, nextRound, timeoutRound, resetGame }
 }

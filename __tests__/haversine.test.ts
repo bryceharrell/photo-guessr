@@ -23,15 +23,26 @@ describe('calculateScore', () => {
     expect(calculateScore(0)).toBe(5000)
   })
 
-  it('returns 4000 for 100 miles', () => {
-    expect(calculateScore(100)).toBe(4000)
+  it('returns an integer score for any distance', () => {
+    expect(Number.isInteger(calculateScore(73))).toBe(true)
+    expect(Number.isInteger(calculateScore(123.456))).toBe(true)
   })
 
-  it('returns 0 for 500 miles', () => {
-    expect(calculateScore(500)).toBe(0)
+  it('drops to roughly half at 200 miles (exponential characteristic distance)', () => {
+    const score = calculateScore(200)
+    expect(score).toBeGreaterThan(1700)
+    expect(score).toBeLessThan(2000)
   })
 
-  it('returns 0 (not negative) for distances over 500 miles', () => {
-    expect(calculateScore(1000)).toBe(0)
+  it('drops off faster than linear (100 miles should score below 4000)', () => {
+    expect(calculateScore(100)).toBeLessThan(4000)
+  })
+
+  it('scores a 500-mile miss well below 1000', () => {
+    expect(calculateScore(500)).toBeLessThan(1000)
+  })
+
+  it('never returns a negative score', () => {
+    expect(calculateScore(10000)).toBeGreaterThanOrEqual(0)
   })
 })

@@ -20,5 +20,5 @@ export function haversineDistance(
 }
 
 export function calculateScore(distanceMiles: number): number {
-  return Math.max(0, 5000 - distanceMiles * 10)
+  return Math.round(5000 * Math.exp(-distanceMiles / 200))
 }

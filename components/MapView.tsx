@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback } from 'react'
 import Map, { Layer, Marker, Source } from 'react-map-gl/mapbox'
-import type { MapMouseEvent, MapRef } from 'react-map-gl/mapbox'
+import type { MapMouseEvent } from 'react-map-gl/mapbox'
 
 // Token is provided via NEXT_PUBLIC_MAPBOX_TOKEN in .env.local
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
@@ -17,8 +17,6 @@ type Props = {
 }
 
 export default function MapView({ onPinDrop, guessPin, actualPin, resultMode = false }: Props) {
-  const mapRef = useRef<MapRef>(null)
-
   const handleClick = useCallback(
     (e: MapMouseEvent) => {
       if (!resultMode && onPinDrop) {
@@ -27,18 +25,6 @@ export default function MapView({ onPinDrop, guessPin, actualPin, resultMode = f
     },
     [resultMode, onPinDrop],
   )
-
-  useEffect(() => {
-    if (resultMode && guessPin && actualPin && mapRef.current) {
-      mapRef.current.fitBounds(
-        [
-          [Math.min(guessPin.lng, actualPin.lng), Math.min(guessPin.lat, actualPin.lat)],
-          [Math.max(guessPin.lng, actualPin.lng), Math.max(guessPin.lat, actualPin.lat)],
-        ],
-        { padding: 80, duration: 800 },
-      )
-    }
-  }, [resultMode, guessPin, actualPin])
 
   const lineGeoJSON: GeoJSON.Feature<GeoJSON.LineString> | null =
     resultMode && guessPin && actualPin
@@ -55,13 +41,23 @@ export default function MapView({ onPinDrop, guessPin, actualPin, resultMode = f
         }
       : null
 
+  const initialViewState =
+    resultMode && guessPin && actualPin
+      ? {
+          bounds: [
+            [Math.min(guessPin.lng, actualPin.lng), Math.min(guessPin.lat, actualPin.lat)],
+            [Math.max(guessPin.lng, actualPin.lng), Math.max(guessPin.lat, actualPin.lat)],
+          ] as [[number, number], [number, number]],
+          fitBoundsOptions: { padding: 100 },
+        }
+      : { longitude: 0, latitude: 20, zoom: 1.5 }
+
   return (
     <Map
-      ref={mapRef}
       mapboxAccessToken={MAPBOX_TOKEN}
-      initialViewState={{ longitude: 0, latitude: 20, zoom: 1.5 }}
+      initialViewState={initialViewState}
       style={{ width: '100%', height: '100%' }}
-      mapStyle="mapbox://styles/mapbox/dark-v11"
+      mapStyle="mapbox://styles/mapbox/navigation-night-v1"
       onClick={handleClick}
       cursor={resultMode ? 'default' : 'crosshair'}
     >

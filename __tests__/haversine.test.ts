@@ -28,8 +28,8 @@ describe('calculateScore', () => {
     expect(Number.isInteger(calculateScore(123.456))).toBe(true)
   })
 
-  it('drops to roughly half at 200 miles (exponential characteristic distance)', () => {
-    const score = calculateScore(200)
+  it('drops to roughly 37% at 100 miles (exponential characteristic distance)', () => {
+    const score = calculateScore(100)
     expect(score).toBeGreaterThan(1700)
     expect(score).toBeLessThan(2000)
   })

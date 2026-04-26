@@ -114,7 +114,7 @@ export default function UploadScreen({ onStartGame }: Props) {
               mode === 'challenge' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Challenge
+            Challenge Friends
           </button>
         </div>
 

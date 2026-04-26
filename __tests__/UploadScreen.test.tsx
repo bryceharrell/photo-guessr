@@ -42,7 +42,7 @@ describe('UploadScreen', () => {
 
   it('shows "Create Challenge" button in challenge mode', async () => {
     render(<UploadScreen onStartGame={jest.fn()} />)
-    await userEvent.click(screen.getByRole('button', { name: /^challenge$/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^challenge friends$/i }))
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     await userEvent.upload(fileInput, makeImageFile())
     await waitFor(() => expect(screen.getByRole('button', { name: /create challenge/i })).toBeInTheDocument())
@@ -57,7 +57,7 @@ describe('UploadScreen', () => {
       .mockResolvedValueOnce({ ok: true })
 
     render(<UploadScreen onStartGame={jest.fn()} />)
-    await userEvent.click(screen.getByRole('button', { name: /^challenge$/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^challenge friends$/i }))
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     await userEvent.upload(fileInput, makeImageFile())
 

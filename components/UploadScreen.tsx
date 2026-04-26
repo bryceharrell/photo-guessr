@@ -76,7 +76,7 @@ export default function UploadScreen({ onStartGame }: Props) {
             {photos.map((photo) => (
               <li key={photo.id} className="flex items-center gap-3 bg-zinc-900 rounded-lg px-4 py-3">
                 <img src={photo.previewUrl} alt="" className="w-10 h-10 object-cover rounded flex-shrink-0" />
-                <span className="flex-1 text-sm text-zinc-300 truncate">{photo.file.name}</span>
+                <span className="flex-1 text-sm text-zinc-300 truncate">{photo.file?.name ?? 'Photo'}</span>
                 {photo.hasLocation ? (
                   <span className="text-green-400 text-xs flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">

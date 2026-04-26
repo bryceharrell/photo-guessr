@@ -1,6 +1,6 @@
 export type Photo = {
   id: string
-  file: File
+  file?: File
   previewUrl: string
   lat: number | null
   lng: number | null

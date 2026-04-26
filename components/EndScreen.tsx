@@ -13,6 +13,9 @@ export default function EndScreen({ rounds, onPlayAgain }: Props) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
+      <a href="/" className="absolute top-4 left-4 text-sm font-semibold text-white hover:text-zinc-300 transition-colors">
+        PhotoGuessr
+      </a>
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-1">Game Over</h2>
@@ -31,7 +34,9 @@ export default function EndScreen({ rounds, onPlayAgain }: Props) {
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-zinc-400">Round {i + 1}</p>
-                <p className="text-sm text-zinc-300">{round.distanceMiles?.toFixed(1)} miles off</p>
+                <p className="text-sm text-zinc-300">
+                  {round.distanceMiles != null ? `${round.distanceMiles.toFixed(1)} miles off` : 'Ran out of time'}
+                </p>
               </div>
               <p className="text-white font-semibold tabular-nums">{round.score?.toLocaleString()}</p>
             </li>

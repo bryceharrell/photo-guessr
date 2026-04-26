@@ -8,6 +8,7 @@ const config: Config = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
     '^mapbox-gl$': '<rootDir>/__mocks__/mapbox-gl.ts',
+    '^@/(.*)$': '<rootDir>/$1',
   },
 }
 

@@ -56,7 +56,7 @@ export default function RoundScreen({ round, roundNumber, totalRounds, onSubmitG
         {secondsLeft}s
       </div>
 
-      <div className="absolute bottom-4 left-4 right-4 z-10 flex items-end justify-between gap-3 pointer-events-none">
+      <div className="absolute bottom-16 left-4 right-4 z-10 flex items-end justify-between gap-3 pointer-events-none">
         <div className="pointer-events-auto">
           <PhotoPiP previewUrl={round.photo.previewUrl} />
         </div>

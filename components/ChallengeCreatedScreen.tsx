@@ -31,7 +31,7 @@ export default function ChallengeCreatedScreen({ challengeId }: Props) {
           Share Challenge
         </button>
         <a
-          href={`/challenge/${challengeId}`}
+          href={`/challenge/${challengeId}?own=true`}
           className="block w-full bg-zinc-800 text-white font-semibold py-3 rounded-xl hover:bg-zinc-700 transition-colors"
         >
           Play it myself

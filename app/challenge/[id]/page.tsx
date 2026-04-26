@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useGameState } from '@/hooks/useGameState'
 import ChallengeIntroScreen from '@/components/ChallengeIntroScreen'
 import RoundScreen from '@/components/RoundScreen'
@@ -19,7 +19,9 @@ type ApiRound = {
 
 export default function ChallengePage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const challengeId = params.id as string
+  const isOwn = searchParams.get('own') === 'true'
   const [rounds, setRounds] = useState<Round[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
@@ -72,7 +74,7 @@ export default function ChallengePage() {
         </div>
       )
     }
-    return <ChallengeIntroScreen onStart={() => startChallenge(rounds)} />
+    return <ChallengeIntroScreen onStart={() => startChallenge(rounds)} isOwn={isOwn} />
   }
 
   if (gameState.status === 'playing') {

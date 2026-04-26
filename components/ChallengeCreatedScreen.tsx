@@ -16,6 +16,9 @@ export default function ChallengeCreatedScreen({ challengeId }: Props) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
+      <a href="/" className="absolute top-4 left-4 text-sm font-semibold text-white hover:text-zinc-300 transition-colors">
+        PhotoGuessr
+      </a>
       <div className="w-full max-w-lg text-center">
         <h2 className="text-3xl font-bold mb-2">Challenge created!</h2>
         <p className="text-zinc-400 mb-8">

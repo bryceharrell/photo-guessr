@@ -29,6 +29,10 @@ export function useGameState() {
     setGameState({ status: 'playing', rounds, currentRoundIndex: 0 })
   }
 
+  function startChallenge(rounds: Round[]) {
+    setGameState({ status: 'playing', rounds, currentRoundIndex: 0 })
+  }
+
   function submitGuess(lat: number, lng: number) {
     setGameState((prev) => {
       const round = prev.rounds[prev.currentRoundIndex]
@@ -79,5 +83,5 @@ export function useGameState() {
     setGameState(INITIAL_STATE)
   }
 
-  return { gameState, startGame, submitGuess, nextRound, timeoutRound, resetGame }
+  return { gameState, startGame, startChallenge, submitGuess, nextRound, timeoutRound, resetGame }
 }

@@ -1,6 +1,23 @@
 import { renderHook, act } from '@testing-library/react'
 import { useGameState } from '../hooks/useGameState'
-import type { Photo } from '../lib/types'
+import type { Photo, Round } from '../lib/types'
+
+const makeChallengeRound = (overrides: Partial<Round> = {}): Round => ({
+  id: crypto.randomUUID(),
+  photo: {
+    id: crypto.randomUUID(),
+    previewUrl: 'https://example.com/photo.jpg',
+    lat: 40.7128,
+    lng: -74.006,
+    hasLocation: true,
+  },
+  guessedLat: null,
+  guessedLng: null,
+  distanceMiles: null,
+  score: null,
+  completed: false,
+  ...overrides,
+})
 
 const makePhoto = (overrides: Partial<Photo> = {}): Photo => ({
   id: crypto.randomUUID(),
@@ -109,5 +126,27 @@ describe('useGameState', () => {
     act(() => { result.current.timeoutRound() })
     const round = result.current.gameState.rounds[0]
     expect(round.distanceMiles).toBeNull()
+  })
+
+  it('startChallenge transitions directly to playing', () => {
+    const { result } = renderHook(() => useGameState())
+    act(() => { result.current.startChallenge([makeChallengeRound()]) })
+    expect(result.current.gameState.status).toBe('playing')
+  })
+
+  it('startChallenge sets the provided rounds verbatim', () => {
+    const rounds = [makeChallengeRound(), makeChallengeRound()]
+    const { result } = renderHook(() => useGameState())
+    act(() => { result.current.startChallenge(rounds) })
+    expect(result.current.gameState.rounds).toEqual(rounds)
+    expect(result.current.gameState.currentRoundIndex).toBe(0)
+  })
+
+  it('startChallenge does not shuffle or cap rounds', () => {
+    const rounds = Array.from({ length: 5 }, () => makeChallengeRound())
+    const ids = rounds.map(r => r.id)
+    const { result } = renderHook(() => useGameState())
+    act(() => { result.current.startChallenge(rounds) })
+    expect(result.current.gameState.rounds.map(r => r.id)).toEqual(ids)
   })
 })

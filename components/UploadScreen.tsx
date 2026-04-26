@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { Photo } from '@/lib/types'
 import { parseGps } from '@/lib/exif'
 
@@ -11,6 +12,9 @@ type Props = {
 export default function UploadScreen({ onStartGame }: Props) {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [isDragging, setIsDragging] = useState(false)
+  const [mode, setMode] = useState<'solo' | 'challenge'>('solo')
+  const [isCreating, setIsCreating] = useState(false)
+  const router = useRouter()
 
   const processFiles = useCallback(async (files: FileList | File[]) => {
     const newPhotos: Photo[] = []
@@ -48,6 +52,25 @@ export default function UploadScreen({ onStartGame }: Props) {
     if (e.dataTransfer.files) processFiles(e.dataTransfer.files)
   }
 
+  async function handleCreateChallenge() {
+    const validPhotos = photos.filter((p) => p.hasLocation).slice(0, 5)
+    const formData = new FormData()
+    validPhotos.forEach((photo) => {
+      formData.append('photos[]', photo.file!)
+      formData.append('lats[]', String(photo.lat))
+      formData.append('lngs[]', String(photo.lng))
+    })
+
+    setIsCreating(true)
+    try {
+      const res = await fetch('/api/challenges', { method: 'POST', body: formData })
+      const data = await res.json()
+      router.push(`/challenge/${data.id}/created`)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   const validCount = photos.filter((p) => p.hasLocation).length
 
   return (
@@ -57,6 +80,31 @@ export default function UploadScreen({ onStartGame }: Props) {
           <h1 className="text-4xl font-bold tracking-tight mb-2">PhotoGuessr</h1>
           <p className="text-zinc-400">Upload photos and guess where they were taken.</p>
         </div>
+
+        <div className="flex rounded-lg overflow-hidden border border-zinc-700 mb-6">
+          <button
+            onClick={() => setMode('solo')}
+            className={`flex-1 py-2 text-sm font-medium transition-colors ${
+              mode === 'solo' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            Solo
+          </button>
+          <button
+            onClick={() => setMode('challenge')}
+            className={`flex-1 py-2 text-sm font-medium transition-colors ${
+              mode === 'challenge' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            Challenge
+          </button>
+        </div>
+
+        {mode === 'challenge' && (
+          <p className="text-zinc-500 text-xs text-center mb-4">
+            Photos you upload may be seen by anyone with the challenge link.
+          </p>
+        )}
 
         <label
           className={`block border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
@@ -92,12 +140,24 @@ export default function UploadScreen({ onStartGame }: Props) {
           </ul>
         )}
 
-        {validCount > 0 && (
+        {validCount > 0 && mode === 'solo' && (
           <button
             onClick={() => onStartGame(photos)}
             className="mt-6 w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 transition-colors"
           >
             Start Game ({validCount} {validCount === 1 ? 'photo' : 'photos'})
+          </button>
+        )}
+
+        {validCount > 0 && mode === 'challenge' && (
+          <button
+            onClick={handleCreateChallenge}
+            disabled={isCreating}
+            className="mt-6 w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50"
+          >
+            {isCreating
+              ? 'Creating...'
+              : `Create Challenge (${validCount} ${validCount === 1 ? 'photo' : 'photos'})`}
           </button>
         )}
       </div>

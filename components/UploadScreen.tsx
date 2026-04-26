@@ -14,6 +14,7 @@ export default function UploadScreen({ onStartGame }: Props) {
   const [isDragging, setIsDragging] = useState(false)
   const [mode, setMode] = useState<'solo' | 'challenge'>('solo')
   const [isCreating, setIsCreating] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null)
   const router = useRouter()
 
   const processFiles = useCallback(async (files: FileList | File[]) => {
@@ -62,10 +63,17 @@ export default function UploadScreen({ onStartGame }: Props) {
     })
 
     setIsCreating(true)
+    setCreateError(null)
     try {
       const res = await fetch('/api/challenges', { method: 'POST', body: formData })
+      if (!res.ok) {
+        const err = await res.text()
+        throw new Error(`Server error ${res.status}: ${err}`)
+      }
       const data = await res.json()
       router.push(`/challenge/${data.id}/created`)
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setIsCreating(false)
     }
@@ -147,6 +155,10 @@ export default function UploadScreen({ onStartGame }: Props) {
           >
             Start Game ({validCount} {validCount === 1 ? 'photo' : 'photos'})
           </button>
+        )}
+
+        {createError && (
+          <p className="mt-4 text-red-400 text-sm text-center">{createError}</p>
         )}
 
         {validCount > 0 && mode === 'challenge' && (

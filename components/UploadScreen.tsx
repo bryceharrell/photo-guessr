@@ -56,24 +56,32 @@ export default function UploadScreen({ onStartGame }: Props) {
 
   async function handleCreateChallenge() {
     const validPhotos = photos.filter((p) => p.hasLocation).slice(0, 5)
-    const formData = new FormData()
-    await Promise.all(validPhotos.map(async (photo) => {
-      const compressed = await compressImage(photo.file!)
-      formData.append('photos[]', compressed)
-      formData.append('lats[]', String(photo.lat))
-      formData.append('lngs[]', String(photo.lng))
-    }))
 
     setIsCreating(true)
     setCreateError(null)
     try {
-      const res = await fetch('/api/challenges', { method: 'POST', body: formData })
+      const res = await fetch('/api/challenges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rounds: validPhotos.map((p) => ({ lat: p.lat, lng: p.lng })) }),
+      })
       if (!res.ok) {
         const err = await res.text()
         throw new Error(`Server error ${res.status}: ${err}`)
       }
-      const data = await res.json()
-      router.push(`/challenge/${data.id}/created`)
+      const { id, uploads } = await res.json()
+
+      await Promise.all(validPhotos.map(async (photo, i) => {
+        const compressed = await compressImage(photo.file!)
+        const uploadRes = await fetch(uploads[i].signedUrl, {
+          method: 'PUT',
+          body: compressed,
+          headers: { 'Content-Type': 'image/jpeg' },
+        })
+        if (!uploadRes.ok) throw new Error(`Photo upload failed: ${uploadRes.status}`)
+      }))
+
+      router.push(`/challenge/${id}/created`)
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {

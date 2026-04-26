@@ -48,11 +48,13 @@ describe('UploadScreen', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: /create challenge/i })).toBeInTheDocument())
   })
 
-  it('calls POST /api/challenges and redirects on challenge creation', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ id: 'new-challenge-id' }),
-    })
+  it('calls POST /api/challenges with JSON metadata then PUTs photos to signed URLs', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'new-challenge-id', uploads: [{ signedUrl: 'https://storage.example.com/upload/photo.jpg' }] }),
+      })
+      .mockResolvedValueOnce({ ok: true })
 
     render(<UploadScreen onStartGame={jest.fn()} />)
     await userEvent.click(screen.getByRole('button', { name: /^challenge$/i }))
@@ -63,7 +65,11 @@ describe('UploadScreen', () => {
     await userEvent.click(screen.getByRole('button', { name: /create challenge/i }))
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/challenges', expect.objectContaining({ method: 'POST' }))
+      expect(mockFetch).toHaveBeenCalledWith('/api/challenges', expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+      }))
+      expect(mockFetch).toHaveBeenCalledWith('https://storage.example.com/upload/photo.jpg', expect.objectContaining({ method: 'PUT' }))
       expect(mockPush).toHaveBeenCalledWith('/challenge/new-challenge-id/created')
     })
   })

@@ -15,24 +15,26 @@ function buildMockClient(challengeId = 'challenge-abc') {
   const mockSelectChallenge = jest.fn(() => ({ single: mockSingle }))
   const mockInsertChallenge = jest.fn(() => ({ select: mockSelectChallenge }))
   const mockInsertRounds = jest.fn().mockResolvedValue({ error: null })
-  const mockUpload = jest.fn().mockResolvedValue({ error: null })
+  const mockCreateSignedUploadUrl = jest.fn((path: string) =>
+    Promise.resolve({ data: { signedUrl: `https://storage.example.com/upload/${path}`, path }, error: null })
+  )
 
   return {
     from: jest.fn((table: string) => {
       if (table === 'challenges') return { insert: mockInsertChallenge }
       if (table === 'rounds') return { insert: mockInsertRounds }
     }),
-    storage: { from: jest.fn(() => ({ upload: mockUpload })) },
-    _mocks: { mockInsertRounds, mockUpload },
+    storage: { from: jest.fn(() => ({ createSignedUploadUrl: mockCreateSignedUploadUrl })) },
+    _mocks: { mockInsertRounds, mockCreateSignedUploadUrl },
   }
 }
 
-function buildRequest(photos: File[], lats: number[], lngs: number[]) {
-  const formData = new FormData()
-  photos.forEach(f => formData.append('photos[]', f))
-  lats.forEach(l => formData.append('lats[]', String(l)))
-  lngs.forEach(l => formData.append('lngs[]', String(l)))
-  return new NextRequest('http://localhost/api/challenges', { method: 'POST', body: formData })
+function buildRequest(rounds: { lat: number; lng: number }[]) {
+  return new NextRequest('http://localhost/api/challenges', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rounds }),
+  })
 }
 
 describe('POST /api/challenges', () => {
@@ -42,11 +44,7 @@ describe('POST /api/challenges', () => {
     const client = buildMockClient('challenge-abc')
     ;(createServerClient as jest.Mock).mockReturnValue(client)
 
-    const req = buildRequest(
-      [new File([''], 'a.jpg', { type: 'image/jpeg' })],
-      [40.7128],
-      [-74.006]
-    )
+    const req = buildRequest([{ lat: 40.7128, lng: -74.006 }])
     const res = await POST(req)
     const data = await res.json()
 
@@ -54,18 +52,29 @@ describe('POST /api/challenges', () => {
     expect(data.id).toBe('challenge-abc')
   })
 
-  it('inserts one round per photo', async () => {
+  it('returns a signed upload URL for each round', async () => {
+    const client = buildMockClient('challenge-abc')
+    ;(createServerClient as jest.Mock).mockReturnValue(client)
+
+    const req = buildRequest([
+      { lat: 40.7128, lng: -74.006 },
+      { lat: 51.5074, lng: -0.1278 },
+    ])
+    const res = await POST(req)
+    const data = await res.json()
+
+    expect(data.uploads).toHaveLength(2)
+    expect(data.uploads[0].signedUrl).toContain('https://storage.example.com')
+  })
+
+  it('inserts one round per input with correct coords', async () => {
     const client = buildMockClient()
     ;(createServerClient as jest.Mock).mockReturnValue(client)
 
-    const req = buildRequest(
-      [
-        new File([''], 'a.jpg', { type: 'image/jpeg' }),
-        new File([''], 'b.jpg', { type: 'image/jpeg' }),
-      ],
-      [40.7128, 51.5074],
-      [-74.006, -0.1278]
-    )
+    const req = buildRequest([
+      { lat: 40.7128, lng: -74.006 },
+      { lat: 51.5074, lng: -0.1278 },
+    ])
     await POST(req)
 
     const insertedRounds = client._mocks.mockInsertRounds.mock.calls[0][0]
@@ -85,13 +94,7 @@ describe('POST /api/challenges', () => {
     }))
     ;(createServerClient as jest.Mock).mockReturnValue(client)
 
-    const req = buildRequest(
-      [new File([''], 'a.jpg', { type: 'image/jpeg' })],
-      [40.7128],
-      [-74.006]
-    )
-    const res = await POST(req)
-
+    const res = await POST(buildRequest([{ lat: 40.7128, lng: -74.006 }]))
     expect(res.status).toBe(500)
   })
 })

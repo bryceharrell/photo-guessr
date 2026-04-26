@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
-  const formData = await req.formData()
-  const photos = formData.getAll('photos[]') as File[]
-  const lats = (formData.getAll('lats[]') as string[]).map(Number)
-  const lngs = (formData.getAll('lngs[]') as string[]).map(Number)
+  const { rounds } = await req.json() as { rounds: { lat: number; lng: number }[] }
 
   const supabase = createServerClient()
 
@@ -28,16 +25,18 @@ export async function POST(req: NextRequest) {
     lng: number
   }[] = []
 
-  for (let i = 0; i < photos.length; i++) {
+  const uploads: { signedUrl: string }[] = []
+
+  for (let i = 0; i < rounds.length; i++) {
     const roundId = crypto.randomUUID()
     const storagePath = `${challenge.id}/${roundId}.jpg`
 
-    const { error: uploadError } = await supabase.storage
+    const { data: uploadData, error: signError } = await supabase.storage
       .from('challenge-photos')
-      .upload(storagePath, photos[i])
+      .createSignedUploadUrl(storagePath)
 
-    if (uploadError) {
-      return NextResponse.json({ error: 'Failed to upload photo' }, { status: 500 })
+    if (signError || !uploadData) {
+      return NextResponse.json({ error: 'Failed to create upload URL' }, { status: 500 })
     }
 
     roundInserts.push({
@@ -45,9 +44,11 @@ export async function POST(req: NextRequest) {
       challenge_id: challenge.id,
       order: i,
       storage_path: storagePath,
-      lat: lats[i],
-      lng: lngs[i],
+      lat: rounds[i].lat,
+      lng: rounds[i].lng,
     })
+
+    uploads.push({ signedUrl: uploadData.signedUrl })
   }
 
   const { error: roundsError } = await supabase.from('rounds').insert(roundInserts)
@@ -56,5 +57,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create rounds' }, { status: 500 })
   }
 
-  return NextResponse.json({ id: challenge.id })
+  return NextResponse.json({ id: challenge.id, uploads })
 }

@@ -20,6 +20,10 @@ jest.mock('../lib/exif', () => ({
   parseGps: jest.fn().mockResolvedValue({ lat: 40.7128, lng: -74.006 }),
 }))
 
+jest.mock('../lib/compress', () => ({
+  compressImage: jest.fn((file: File) => Promise.resolve(file)),
+}))
+
 describe('UploadScreen', () => {
   beforeEach(() => jest.clearAllMocks())
 

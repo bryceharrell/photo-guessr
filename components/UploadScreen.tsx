@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Photo } from '@/lib/types'
 import { parseGps } from '@/lib/exif'
+import { compressImage } from '@/lib/compress'
 
 type Props = {
   onStartGame: (photos: Photo[]) => void
@@ -56,11 +57,12 @@ export default function UploadScreen({ onStartGame }: Props) {
   async function handleCreateChallenge() {
     const validPhotos = photos.filter((p) => p.hasLocation).slice(0, 5)
     const formData = new FormData()
-    validPhotos.forEach((photo) => {
-      formData.append('photos[]', photo.file!)
+    await Promise.all(validPhotos.map(async (photo) => {
+      const compressed = await compressImage(photo.file!)
+      formData.append('photos[]', compressed)
       formData.append('lats[]', String(photo.lat))
       formData.append('lngs[]', String(photo.lng))
-    })
+    }))
 
     setIsCreating(true)
     setCreateError(null)
